@@ -257,7 +257,7 @@ void approachController() {
     Serial.println(actuation);
 
     /***
-     *  If error ( eT_deltaT) is mall and magnitude of actuation is very small, just
+     *  If error ( eT_deltaT) is small and magnitude of actuation is very small, just
      *  call it zero.
      */
     if ( (fabs(actuation) < 0.2) || (fabs(eT_deltaT) < 0.1) ) { 
