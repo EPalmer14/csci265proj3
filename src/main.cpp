@@ -395,7 +395,7 @@ void loop() {
 
         behaviorState|= MASK_WANDER;
         wanderController();
-        behaviorState &= MASK_WANDER;
+        behaviorState &= (~MASK_WANDER);
 
       } else {
         delay(5);
