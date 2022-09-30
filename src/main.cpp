@@ -389,13 +389,13 @@ void loop() {
         approachController();
         behaviorState &= (~MASK_APPROACH);
 
-        //behaviorState|= MASK_WALLFOLLOW;
-        //wallFollowController();
-        //behaviorState&= (~MASK_WALLFOLLOW);
+        behaviorState|= MASK_WALLFOLLOW;
+        wallFollowController();
+        behaviorState &= (~MASK_WALLFOLLOW);
 
-        //behaviorState|= MASK_WANDER;
-        //wanderController();
-        //behaviorState&= MASK_WANDER;
+        behaviorState|= MASK_WANDER;
+        wanderController();
+        behaviorState &= MASK_WANDER;
 
       } else {
         delay(5);
