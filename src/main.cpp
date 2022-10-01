@@ -156,8 +156,8 @@ void wallFollowController () {
      */
      if (behaviorState & MASK_WALLFOLLOW)  {
        Serial.println("wallFollowController:  activated");
-       chassis.moveArch(10,25, true);
        chassis.turnFor(WALL_FOLLOW_TURNANGLE, WALL_FOLLOW_TURNRATE, true);
+       chassis.moveArch(10,25, true);
        behaviorState &= (~MASK_WALLFOLLOW);
      } else {
        break;
@@ -175,21 +175,37 @@ void wallFollowController () {
  */
 void wanderController() {
   float turnAngle= rand() % WANDER_ANGLE;
+  distance = 0.0;
 
   /****
    *  activate wander only if approach controller
    *  and wall follow controllers are not active
    */
-  if ( behaviorState & MASK_WANDER) {
+  if ( (behaviorState & MASK_WANDER)) {
     Serial.println("wanderController:  activated");
 
     Serial.print("wanderController:  selected turnAngle= ");
     Serial.println(turnAngle);
 
     chassis.turnFor(turnAngle, WANDER_TURN_RATE, true);
-    chassis.driveFor(WANDER_DIST, WANDER_SPEED, true);
-    behaviorState &= (~MASK_WANDER);
-  } 
+    Serial.println("ROMI TURNED");
+    //delay(100);
+    distance = rangefinder.getDistance();
+    //inches = distance * CM_TO_INCHES;
+    //Serial.print("WANDER DISTANCE= ");
+    //Serial.println(inches);
+    delay(10);
+    distance = rangefinder.getDistance();
+    inches = distance * CM_TO_INCHES;
+    Serial.print("WANDER DISTANCE= ");
+    Serial.println(inches);
+    if(inches < 20.0){
+      behaviorState &= (~MASK_WANDER);
+    }else {
+      chassis.driveFor(WANDER_DIST, WANDER_SPEED, true);
+      behaviorState &= (~MASK_WANDER);
+    }
+  }
 }
 
 
@@ -354,7 +370,9 @@ void loop() {
 
 
       //ultrasonic rangefinder
-      distance= rangefinder.getDistance();
+      distance = rangefinder.getDistance();
+      delay(100);
+      distance = rangefinder.getDistance();
 
 
       state= STATE_THINK;
@@ -385,17 +403,25 @@ void loop() {
          *  Test here turning on each
          *  basis behavior
          */
-        behaviorState|= MASK_APPROACH; 
-        approachController();
-        behaviorState &= (~MASK_APPROACH);
 
-        behaviorState|= MASK_WALLFOLLOW;
-        wallFollowController();
-        behaviorState &= (~MASK_WALLFOLLOW);
-
-        behaviorState|= MASK_WANDER;
-        wanderController();
-        behaviorState &= (~MASK_WANDER);
+        if((meas <= 20.0 && meas > 6.25) || (meas <= 20.0 && meas < 5.75)){
+          Serial.println("THIS IS APPROACH");
+          behaviorState|= MASK_APPROACH;
+          approachController();
+          behaviorState &= (~MASK_APPROACH);
+        }
+        else if(5.75 <= meas && meas <= 6.25){
+          Serial.println("THIS IS WALL FOLLOW");
+          behaviorState|= MASK_WALLFOLLOW;
+          wallFollowController();
+          //behaviorState &= (~MASK_WALLFOLLOW);
+        }
+        else if(meas > 20.0){
+          Serial.println("THIS IS WANDER");
+          behaviorState|= MASK_WANDER;
+          wanderController();
+          //behaviorState &= (~MASK_WANDER);
+        }      
 
       } else {
         delay(5);
